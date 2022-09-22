@@ -1,4 +1,5 @@
 <h1 align="center">Hi there 👋, I'm Brendan Miller
+<h1 align="center">Things to know about me
 
 <!--
 **Bjm147/Bjm147** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
