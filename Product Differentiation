@@ -1,0 +1,73 @@
+import requests, json
+import os
+
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt 
+import statistics
+
+import numpy as np 
+import pandas as pd 
+from sklearn.cluster import KMeans
+
+%run APIkeys.py
+
+def checkUPC_edamam(upc):
+    ID_edamam = os.environ['EDAMAM_API_id']
+    KEY_edamam = os.environ['EDAMAM_API_key']
+    baseURL = 'https://api.edamam.com/api/food-database/v2/parser?app_id='+ID_edamam+'&app_key='+KEY_edamam+'&upc='
+    endURL = '&nutrition-type=cooking&category=packaged-foods'
+    url = baseURL + upc + endURL
+    info = requests.get(url).json()
+    if 'error' in info:
+        return info
+    else:
+        answer = info['hints'][0]['food']['nutrients']
+        
+        sizeList = info['hints'][0]['food']['servingSizes']
+        n = len(sizeList)
+        for i in range(n):
+            if sizeList[i]['label'] == 'Gram':
+                answer['servingSize_gram'] = info['hints'][0]['food']['servingSizes'][i]['quantity']
+            if sizeList[i]['label'] == 'Cup':
+                answer['servingSize_cup'] = info['hints'][0]['food']['servingSizes'][i]['quantity']
+        
+        answer['label'] = info['hints'][0]['food']['label']
+        answer['upc'] = upc
+        return answer
+
+def multiUPC_edamam(shelf, verbose = False, leftovers = False, source=""):  
+    found = []    
+    unfound = []   
+    for upc in shelf:
+        info = checkUPC_edamam(upc) 
+        if 'error' in info:
+            unfound.append(upc) 
+            if verbose:
+                print('UPC ',upc, ' does not exist in the API\'s data base') 
+        else:
+            if verbose:
+                print('UPC ',upc, ' exists in the API\'s data base')
+            found.append(info)
+    if len(found)>0:
+        df_found = pd.DataFrame(found)
+    else:
+        df_found = pd.DataFrame()
+    df_found["dataSource"] = pd.Series([source for i in range(len(df_found.index))])
+    if leftovers:
+        return df_found,unfound
+    else:
+        return df_found
+
+Kroger_UPCSs = ["0003800019904", "0001600012495", "0001600012254", "0001600012399", "0003800020074", "0088491212971", "0088491235916", "0088491235916", "0001600012222", "0003800019886", "0088491211171", "0001111086705", "0001600010371", "0088491212951", "0003800019934", "0088491235915", "0003800019888", "0001111003245", "0001600012125", "0001600016361", "0003800026996", "0003000006322", "0003000057331", "0001600012224", "0003800019849", "0088491200672", "0088491227311", "0001111089823", "0088491211762", "0003000057323", "0003800020045", "0088397814726", "0003800019851", "0007061700623", "0003000056238", "0001862770321", "1002190845556", "0001862770357", "0088397812911", "0005844977020", "0005844986004", "0088491235916", "0001600012222", "0003800019886", "0088491211171", "0001111086705", "0001600010371", "0088491212951", "0003800019934", "0088491235915", "0003800019888", "0001111003245", "0001600012125", "0001600016361", "0003800026996", "0003000006322", "0003000057331", "0001600012224", "0003800019849", "0088491200672", "0088491227311", "0001111089823", "0088491211762", "0003000057323", "0003800020045", "0088397814726", "0003800019851", "0007061700623", "0003000056238", "0001862770321", "1002190845556", "0001862770357", "0088397812911", "0005844977020", "0005844986004", "0001111010005", " 0003800019906", "0003800020003", "0003800019987", "099482438937"]
+
+Kroger_cereal, Kroger_leftovers = multiUPC_edamam(Kroger_UPCSs, verbose = True, leftovers = True, source = "Kroger")
+
+Amazon_UPCS = ["099482438937", "099482438869", "099482448639", "099482439057", "099482448646", "099482438982", "099482439040", "018627703570", "860002152424"]
+
+Amazon_cereal, Amazon_leftovers = multiUPC_edamam(Amazon_UPCS, verbose = True, leftovers = True, source = "Amazon")
+
+Cereal_combined = Kroger_cereal.append(Amazon_cereal, ignore_index = True)
+Cereal_combined = Cereal_combined[['ENERC_KCAL', 'FAT', 'FASAT', 'CHOCDF', 'FIBTG', 'SUGAR', 'dataSource']]
+Cereal_combined.dropna()
+
+Cereal_combined.describe()
