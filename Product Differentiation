@@ -71,3 +71,42 @@ Cereal_combined = Cereal_combined[['ENERC_KCAL', 'FAT', 'FASAT', 'CHOCDF', 'FIBT
 Cereal_combined.dropna()
 
 Cereal_combined.describe()
+
+fig, axs = plt.subplots(3, 2, squeeze=False, figsize=(18,24)) 
+
+axs[0,0].scatter(Cereal_combined['FAT'], Cereal_combined['SUGAR'])
+axs[0,0].set_title("Fat vs. Sugar")
+axs[0,0].set_xlabel("Fat")
+axs[0,0].set_ylabel("Sugar")
+
+axs[0,1].scatter(Cereal_combined['FAT'], Cereal_combined['FASAT'])
+axs[0,1].set_title("Fat vs. Saturated Fat")
+axs[0,1].set_xlabel("Fat")
+axs[0,1].set_ylabel("Saturated Fat")
+
+
+axs[1,0].scatter(Cereal_combined['CHOCDF'], Cereal_combined['FIBTG'])
+axs[1,0].set_title("Carbs vs. Fiber" )
+axs[1,0].set_xlabel("Carbs")
+axs[1,0].set_ylabel("Fiber")
+
+
+axs[1,1].scatter(Cereal_combined['CHOCDF'], Cereal_combined['ENERC_KCAL'])
+axs[1,1].set_title("Carbs vs. Kilocalories" )
+axs[1,1].set_xlabel("Carbs")
+axs[1,1].set_ylabel("Kilocalories")
+
+axs[2,0].scatter(Cereal_combined['SUGAR'], Cereal_combined['ENERC_KCAL'])
+axs[2,0].set_title("Sugar vs. Kilocalories" )
+axs[2,0].set_xlabel("Sugar")
+axs[2,0].set_ylabel("Kilocalories")
+
+
+axs[2,1].scatter(Cereal_combined['CHOCDF'], Cereal_combined['SUGAR'])
+axs[2,1].set_title("Carbs vs. Sugar" )
+axs[2,1].set_xlabel("Carbs")
+axs[2,1].set_ylabel("Sugar")
+
+
+fig.suptitle('Product differentiation')
+plt.show()
