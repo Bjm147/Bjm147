@@ -110,3 +110,20 @@ axs[2,1].set_ylabel("Sugar")
 
 fig.suptitle('Product differentiation')
 plt.show()
+
+def initialize_centroids(k, data):
+    n_cols = data.shape[1]  
+    
+    centroid_min = data.min()
+    centroid_max = data.max()
+    
+    centroids = np.random.uniform(centroid_min,centroid_max,(k,n_cols))
+
+    centroids = pd.DataFrame(centroids, columns = data.columns)
+
+    return centroids
+
+data = (Cereal_combined['FAT'], Cereal_combined['SUGAR']) 
+
+centroids = initialize_centroids(3, data) 
+centroids
